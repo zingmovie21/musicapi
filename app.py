@@ -1,4 +1,5 @@
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from ytmusicapi import YTMusic
 from typing import Optional
 from pydantic import BaseModel
@@ -8,6 +9,15 @@ app = FastAPI(title="YouTube Music Search API")
 
 # Initialize the YTMusic API
 ytmusic = YTMusic()
+
+# Add CORS Middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Replace "*" with specific origins if needed for security
+    allow_credentials=True,
+    allow_methods=["*"],  # Allow all HTTP methods
+    allow_headers=["*"],  # Allow all headers
+)
 
 class SearchResponse(BaseModel):
     title: str
@@ -23,12 +33,12 @@ class SearchResponse(BaseModel):
 @app.get("/search/", response_model=list[SearchResponse])
 async def search_songs(query: str, filter_type: str = 'songs', limit: int = 5):
     """
-    Search for songs on YouTube Music and return enriched metadata
+    Search for songs on YouTube Music and return enriched metadata.
     
     Args:
-        query: Search query string
-        filter_type: Type of search filter (default: songs)
-        limit: Maximum number of results to return (default: 5)
+        query: Search query string.
+        filter_type: Type of search filter (default: songs).
+        limit: Maximum number of results to return (default: 5).
     """
     try:
         search_results = ytmusic.search(query, filter=filter_type, limit=limit)
@@ -93,11 +103,11 @@ async def search_songs(query: str, filter_type: str = 'songs', limit: int = 5):
 
 @app.get("/")
 async def root():
-    """Root endpoint that provides API information"""
+    """Root endpoint that provides API information."""
     return {
         "name": "YouTube Music Search API",
         "version": "1.0",
-        "description": "API for searching songs on YouTube Music with enriched metadata",
+        "description": "API for searching songs on YouTube Music with enriched metadata.",
         "endpoints": {
             "search": "/search/?query=<search_term>&filter_type=songs&limit=5"
         }
